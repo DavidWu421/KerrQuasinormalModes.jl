@@ -215,20 +215,20 @@ function qnmfunction(::typeof(Custom); s=-2,l=2,m=2,n=0,a=0.00, ω = Complex(0.0
     QuasinormalModeFunction(s,l,m,n,a,ω,Alm,Ψᵣ,Ψᵪ)
 end
 
-(Ψ::QuasinormalModeFunction)(r) =  Ψ.R(r)
+(Ψ::QuasinormalModeFunction)(r) = "AHHHHH"
 (Ψ::QuasinormalModeFunction)(r, z) =  Ψ.R(r)*Ψ.S(z)
 (Ψ::QuasinormalModeFunction)(r, z, ϕ) =  Ψ.R(r)*Ψ.S(z)*exp(im*Ψ.m*ϕ)
 (Ψ::QuasinormalModeFunction)(r, z, ϕ, t) =  Ψ.R(r)*Ψ.S(z)*exp(im*Ψ.m*ϕ)*exp(-im*Ψ.ω*t)
 
-(Ψ::QuasinormalModeFunction)(x::NamedTuple{(:r,),Tuple{Number}}) = Ψ.R(x[:r])
-(Ψ::QuasinormalModeFunction)(x::NamedTuple{(:θ,),Tuple{Number}}) = Ψ.S(cos(x[:θ]))
-(Ψ::QuasinormalModeFunction)(x::NamedTuple{(:z,),Tuple{Number}}) = Ψ.S(x[:z])
-(Ψ::QuasinormalModeFunction)(x::NamedTuple{(:r, :θ),Tuple{Number,Number}}) = Ψ.R(x[:r])*Ψ.S(cos(x[:θ]))
-(Ψ::QuasinormalModeFunction)(x::NamedTuple{(:r, :z),Tuple{Number,Number}}) = Ψ.R(x[:r])*Ψ.S(x[:z])
-(Ψ::QuasinormalModeFunction)(x::NamedTuple{(:r, :θ, :ϕ),Tuple{Number,Number,Number}}) = Ψ.R(x[:r])*Ψ.S(cos(x[:θ]))*exp(im*Ψ.m*ϕ)
-(Ψ::QuasinormalModeFunction)(x::NamedTuple{(:r, :z, :ϕ),Tuple{Number,Number,Number}}) = Ψ.R(x[:r])*Ψ.S(x[:z])*exp(im*Ψ.m*ϕ)
-(Ψ::QuasinormalModeFunction)(x::NamedTuple{(:r, :θ, :ϕ, :t),Tuple{Number,Number,Number,Number}}) = Ψ.R(x[:r])*Ψ.S(cos(x[:θ]))*exp(im*Ψ.m*ϕ)
-(Ψ::QuasinormalModeFunction)(x::NamedTuple{(:r, :z, :ϕ, :t),Tuple{Number,Number,Number,Number}}) = Ψ.R(x[:r])*Ψ.S(x[:z])*exp(im*Ψ.m*ϕ)
+# (Ψ::QuasinormalModeFunction)(x::NamedTuple{(:r,),Tuple{Number}}) = Ψ.R(x[:r])
+# (Ψ::QuasinormalModeFunction)(x::NamedTuple{(:θ,),Tuple{Number}}) = Ψ.S(cos(x[:θ]))
+# (Ψ::QuasinormalModeFunction)(x::NamedTuple{(:z,),Tuple{Number}}) = Ψ.S(x[:z])
+# (Ψ::QuasinormalModeFunction)(x::NamedTuple{(:r, :θ),Tuple{Number,Number}}) = Ψ.R(x[:r])*Ψ.S(cos(x[:θ]))
+# (Ψ::QuasinormalModeFunction)(x::NamedTuple{(:r, :z),Tuple{Number,Number}}) = Ψ.R(x[:r])*Ψ.S(x[:z])
+# (Ψ::QuasinormalModeFunction)(x::NamedTuple{(:r, :θ, :ϕ),Tuple{Number,Number,Number}}) = Ψ.R(x[:r])*Ψ.S(cos(x[:θ]))*exp(im*Ψ.m*ϕ)
+# (Ψ::QuasinormalModeFunction)(x::NamedTuple{(:r, :z, :ϕ),Tuple{Number,Number,Number}}) = Ψ.R(x[:r])*Ψ.S(x[:z])*exp(im*Ψ.m*ϕ)
+# (Ψ::QuasinormalModeFunction)(x::NamedTuple{(:r, :θ, :ϕ, :t),Tuple{Number,Number,Number,Number}}) = Ψ.R(x[:r])*Ψ.S(cos(x[:θ]))*exp(im*Ψ.m*ϕ)
+# (Ψ::QuasinormalModeFunction)(x::NamedTuple{(:r, :z, :ϕ, :t),Tuple{Number,Number,Number,Number}}) = Ψ.R(x[:r])*Ψ.S(x[:z])*exp(im*Ψ.m*ϕ)
 
 # Construct a Spin sequence that spits out QNM modes
 struct ModeSequence
