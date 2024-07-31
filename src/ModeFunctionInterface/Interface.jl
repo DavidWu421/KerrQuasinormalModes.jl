@@ -25,9 +25,9 @@ function (ψᵣ::HeunConfluentRadial)(r;conjugate=false,minus=false)
        finalsum += ψᵣ.coeffs[n]*x^(n-1)
     end
     #print(asymptoticpart)
-    if conjugate==false
+    if conjugate+minus==2||conjugate+minus==0
         asymptoticpart*finalsum
-    elseif conjugate==true
+    elseif conjugate+minus==1
         conj(asymptoticpart*finalsum)
     end
 end
@@ -191,7 +191,7 @@ function qnmfunction(::typeof(Custom); s=-2,l=2,m=2,n=0,a=0.00, ω = Complex(0.0
     QuasinormalModeFunction(s,l,m,n,a,ω,Alm,Ψᵣ,Ψᵪ)
 end
 
-(Ψ::QuasinormalModeFunction)(r; conjugate=false) = Ψ.R(r;conjugate=conjugate) 
+(Ψ::QuasinormalModeFunction)(r; conjugate=false,minus=false) = Ψ.R(r;conjugate=conjugate, minus=minus) 
 (Ψ::QuasinormalModeFunction)(r, z; conjugate=false) = Ψ.R(r;conjugate=conjugate) * Ψ.S(z;conjugate=conjugate)
 (Ψ::QuasinormalModeFunction)(r, z, ϕ) =  Ψ.R(r)*Ψ.S(z)*exp(im*Ψ.m*ϕ)
 (Ψ::QuasinormalModeFunction)(r, z, ϕ, t) =  Ψ.R(r)*Ψ.S(z)*exp(im*Ψ.m*ϕ)*exp(-im*Ψ.ω*t)
