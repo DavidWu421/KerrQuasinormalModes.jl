@@ -11,7 +11,7 @@ struct HeunConfluentRadial{T} <: CallableAtom
     coeffs::T
 end
 
-function (ψᵣ::HeunConfluentRadial)(r)
+function (ψᵣ::HeunConfluentRadial)(r;conjugate=false,minus=false)
     η = ψᵣ.η;
     α = ψᵣ.α;
     ξ = ψᵣ.ξ;
@@ -25,7 +25,11 @@ function (ψᵣ::HeunConfluentRadial)(r)
        finalsum += ψᵣ.coeffs[n]*x^(n-1)
     end
     #print(asymptoticpart)
-    asymptoticpart*finalsum
+    if conjugate==false
+        asymptoticpart*finalsum
+    elseif conjugate==true
+        conj(asymptoticpart*finalsum)
+    end
 end
 
 function ComplexPlot(ψ::HeunConfluentRadial; ztopleft = 0.8 + 1.0im, zbottomright = 2.0 - 0.5im)
@@ -109,10 +113,14 @@ function SpinWeightedSpheroidalCalculation(z,s,l,m,Cllʼ,lmin,lmax)
     val
 end
 
-function (Ψ::SpinWeightedSpheroidal)(z)
+function (Ψ::SpinWeightedSpheroidal)(z,;conjugate=false)
     s = Ψ.s; l = Ψ.l; m = Ψ.m;
     lmin = Ψ.lmin; lmax = Ψ.lmax;
-    SpinWeightedSpheroidalCalculation(z,s,l,m,Ψ.Cllʼ,lmin,lmax)
+    if conjugate == false
+        SpinWeightedSpheroidalCalculation(z,s,l,m,Ψ.Cllʼ,lmin,lmax)
+    elseif conjugate==true
+        conj(SpinWeightedSpheroidalCalculation(z,s,l,m,Ψ.Cllʼ,lmin,lmax))
+    end
 end
 
 (Ψ::SpinWeightedSpheroidal)(z,ϕ) = Ψ(z)*exp(im*Ψ.m*ϕ)
@@ -166,40 +174,8 @@ struct QuasinormalModeFunction{T,L} <: CallableAtom
     S::SpinWeightedSpheroidal{L}
 end
 
-
-
-#=function qnmfunction(; s=-2,l=2,m=2,n=0,a=0.00, N=150)
-    ω, Alm, Cllʼ = qnm(l=l,m=m,s=s,n=n, a=a)
-
-    ((ζ,ξ,η),(p,α,γ,δ,σ),(D₀,D₁,D₂,D₃,D₄)) = ParameterTransformations(l,m,s,a,ω,Alm)
-    r₊ = 1 + sqrt(1-a^2); r₋ = 1 - sqrt(1-a^2)
-
-    ##Radial WaveFunction
-    an = RadialCoefficients(D₀, D₁, D₂, D₃, D₄; N=(N+100))
-    an2 = an[1:N];
-    aₙ = SVector{length(an2),Complex{Float64}}(an2)
-    Ψᵣ = HeunConfluentRadial(η,α,ξ,ζ,r₊,r₋,aₙ)
-
-    ##Angular WaveFunction
-    Ψᵪ = SpinWeightedSpheroidal(s,l,m,Cllʼ)
-
-    QuasinormalModeFunction(s,l,m,n,a,ω,Alm,Ψᵣ,Ψᵪ)
-end
-=#
-#=
-function importqnm()
-    global qnm = pyimport("qnm")
-    qnm.download_data()
-end
-
-function qnmfunctionnew(s,l,m,n,a; N=250)
-    grav_freq = qnm.modes_cache(s=s,l=l,m=m,n=n)
-    ω, Alm, Cllʼ = grav_freq(a=a)
-    qnmfunction(Custom; s=s,l=l,m=m,n=n,a=a,ω=ω,Alm=Alm,Cllʼ=Cllʼ,N=N)
-end
-=#
 struct Custom end
-function qnmfunction(::typeof(Custom); s=-2,l=2,m=2,n=0,a=0.00, ω = Complex(0.0), Alm = Complex(0.0), Cllʼ = [Complex(0.0)], N=150)
+function qnmfunction(::typeof(Custom); s=-2,l=2,m=2,n=0,a=0.00, ω = Complex(0.0), Alm = Complex(0.0), Cllʼ = [Complex(0.0)], N=150,conjugate=false,minus=false)
     ((ζ,ξ,η),(p,α,γ,δ,σ),(D₀,D₁,D₂,D₃,D₄)) = ParameterTransformations(l,m,s,a,ω,Alm)
     r₊ = 1 + sqrt(1-a^2); r₋ = 1 - sqrt(1-a^2)
 
@@ -220,15 +196,15 @@ end
 (Ψ::QuasinormalModeFunction)(r, z, ϕ; conjugate = false) = conjugate ? conj(Ψ.R(r)*Ψ.S(z)*exp(im*Ψ.m*ϕ)) : Ψ.R(r)*Ψ.S(z)*exp(im*Ψ.m*ϕ)
 (Ψ::QuasinormalModeFunction)(r, z, ϕ, t; conjugate = false) =  conjugate ? conj(Ψ.R(r)*Ψ.S(z)*exp(im*Ψ.m*ϕ)*exp(-im*Ψ.ω*t)) : Ψ.R(r)*Ψ.S(z)*exp(im*Ψ.m*ϕ)*exp(-im*Ψ.ω*t)
 
-# (Ψ::QuasinormalModeFunction)(x::NamedTuple{(:r,),Tuple{Number}}) = Ψ.R(x[:r])
-# (Ψ::QuasinormalModeFunction)(x::NamedTuple{(:θ,),Tuple{Number}}) = Ψ.S(cos(x[:θ]))
-# (Ψ::QuasinormalModeFunction)(x::NamedTuple{(:z,),Tuple{Number}}) = Ψ.S(x[:z])
-# (Ψ::QuasinormalModeFunction)(x::NamedTuple{(:r, :θ),Tuple{Number,Number}}) = Ψ.R(x[:r])*Ψ.S(cos(x[:θ]))
-# (Ψ::QuasinormalModeFunction)(x::NamedTuple{(:r, :z),Tuple{Number,Number}}) = Ψ.R(x[:r])*Ψ.S(x[:z])
-# (Ψ::QuasinormalModeFunction)(x::NamedTuple{(:r, :θ, :ϕ),Tuple{Number,Number,Number}}) = Ψ.R(x[:r])*Ψ.S(cos(x[:θ]))*exp(im*Ψ.m*ϕ)
-# (Ψ::QuasinormalModeFunction)(x::NamedTuple{(:r, :z, :ϕ),Tuple{Number,Number,Number}}) = Ψ.R(x[:r])*Ψ.S(x[:z])*exp(im*Ψ.m*ϕ)
-# (Ψ::QuasinormalModeFunction)(x::NamedTuple{(:r, :θ, :ϕ, :t),Tuple{Number,Number,Number,Number}}) = Ψ.R(x[:r])*Ψ.S(cos(x[:θ]))*exp(im*Ψ.m*ϕ)
-# (Ψ::QuasinormalModeFunction)(x::NamedTuple{(:r, :z, :ϕ, :t),Tuple{Number,Number,Number,Number}}) = Ψ.R(x[:r])*Ψ.S(x[:z])*exp(im*Ψ.m*ϕ)
+(Ψ::QuasinormalModeFunction)(x::NamedTuple{(:r,),Tuple{Number}}) = Ψ.R(x[:r])
+(Ψ::QuasinormalModeFunction)(x::NamedTuple{(:θ,),Tuple{Number}}) = Ψ.S(cos(x[:θ]))
+(Ψ::QuasinormalModeFunction)(x::NamedTuple{(:z,),Tuple{Number}}) = Ψ.S(x[:z])
+(Ψ::QuasinormalModeFunction)(x::NamedTuple{(:r, :θ),Tuple{Number,Number}}) = Ψ.R(x[:r])*Ψ.S(cos(x[:θ]))
+(Ψ::QuasinormalModeFunction)(x::NamedTuple{(:r, :z),Tuple{Number,Number}}) = Ψ.R(x[:r])*Ψ.S(x[:z])
+(Ψ::QuasinormalModeFunction)(x::NamedTuple{(:r, :θ, :ϕ),Tuple{Number,Number,Number}}) = Ψ.R(x[:r])*Ψ.S(cos(x[:θ]))*exp(im*Ψ.m*ϕ)
+(Ψ::QuasinormalModeFunction)(x::NamedTuple{(:r, :z, :ϕ),Tuple{Number,Number,Number}}) = Ψ.R(x[:r])*Ψ.S(x[:z])*exp(im*Ψ.m*ϕ)
+(Ψ::QuasinormalModeFunction)(x::NamedTuple{(:r, :θ, :ϕ, :t),Tuple{Number,Number,Number,Number}}) = Ψ.R(x[:r])*Ψ.S(cos(x[:θ]))*exp(im*Ψ.m*ϕ)
+(Ψ::QuasinormalModeFunction)(x::NamedTuple{(:r, :z, :ϕ, :t),Tuple{Number,Number,Number,Number}}) = Ψ.R(x[:r])*Ψ.S(x[:z])*exp(im*Ψ.m*ϕ)
 
 # Construct a Spin sequence that spits out QNM modes
 struct ModeSequence
