@@ -191,10 +191,10 @@ function qnmfunction(::typeof(Custom); s=-2,l=2,m=2,n=0,a=0.00, ω = Complex(0.0
     QuasinormalModeFunction(s,l,m,n,a,ω,Alm,Ψᵣ,Ψᵪ)
 end
 
-(Ψ::QuasinormalModeFunction)(r; conjugate=false) = conjugate ? conj(Ψ.R(r)) : Ψ.R(r) 
-(Ψ::QuasinormalModeFunction)(r, z; conjugate=false) = conjugate ? conj(Ψ.R(r) * Ψ.S(z)) : Ψ.R(r) * Ψ.S(z)
-(Ψ::QuasinormalModeFunction)(r, z, ϕ; conjugate = false) = conjugate ? conj(Ψ.R(r)*Ψ.S(z)*exp(im*Ψ.m*ϕ)) : Ψ.R(r)*Ψ.S(z)*exp(im*Ψ.m*ϕ)
-(Ψ::QuasinormalModeFunction)(r, z, ϕ, t; conjugate = false) =  conjugate ? conj(Ψ.R(r)*Ψ.S(z)*exp(im*Ψ.m*ϕ)*exp(-im*Ψ.ω*t)) : Ψ.R(r)*Ψ.S(z)*exp(im*Ψ.m*ϕ)*exp(-im*Ψ.ω*t)
+(Ψ::QuasinormalModeFunction)(r; conjugate=false) = Ψ.R(r;conjugate=conjugate) 
+(Ψ::QuasinormalModeFunction)(r, z; conjugate=false) = Ψ.R(r;conjugate=conjugate) * Ψ.S(z;conjugate=conjugate)
+(Ψ::QuasinormalModeFunction)(r, z, ϕ) =  Ψ.R(r)*Ψ.S(z)*exp(im*Ψ.m*ϕ)
+(Ψ::QuasinormalModeFunction)(r, z, ϕ, t) =  Ψ.R(r)*Ψ.S(z)*exp(im*Ψ.m*ϕ)*exp(-im*Ψ.ω*t)
 
 (Ψ::QuasinormalModeFunction)(x::NamedTuple{(:r,),Tuple{Number}}) = Ψ.R(x[:r])
 (Ψ::QuasinormalModeFunction)(x::NamedTuple{(:θ,),Tuple{Number}}) = Ψ.S(cos(x[:θ]))
