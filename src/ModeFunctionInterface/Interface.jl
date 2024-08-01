@@ -11,7 +11,7 @@ struct HeunConfluentRadial{T} <: CallableAtom
     coeffs::T
 end
 
-function (ψᵣ::HeunConfluentRadial)(r;isconjugate=false,minus=false)
+function (ψᵣ::HeunConfluentRadial)(r;isconjugate=false,isminus=false)
     η = ψᵣ.η;
     α = ψᵣ.α;
     ξ = ψᵣ.ξ;
@@ -25,9 +25,9 @@ function (ψᵣ::HeunConfluentRadial)(r;isconjugate=false,minus=false)
        finalsum += ψᵣ.coeffs[n]*x^(n-1)
     end
     #print(asymptoticpart)
-    if isconjugate+minus==2||isconjugate+minus==0
+    if isconjugate+isminus==2||isconjugate+isminus==0
         asymptoticpart*finalsum
-    elseif isconjugate+minus==1
+    elseif isconjugate+isminus==1
         conj(asymptoticpart*finalsum)
     end
 end
@@ -44,41 +44,6 @@ struct SpinWeightedSpherical
     s::Int64; l::Int64; m::Int64
 end
 
-#=
-function SpinWeightedSphericalCalculation(z,s,l,m)
-    ### Convention is that θ goes from 0 to pi, and hence cos(θ)
-    ### goes from 1 to -1, which means θ/2 is in the first quadrant
-    ### hence all cot terms are positive, which is why I take the
-    ### positive root whereever needed.
-    ### Pulled from
-    ### https://en.wikipedia.org/wiki/Spin-weighted_spherical_harmonics
-    #Define the overall factor
-    #println((l+m > 20),"  ",(l+s > 20),"  ",(l-m > 20),"  ",(l-s > 20))
-    #println(((l+m > 20) | (l+s > 20) | (l-m > 20) | (l-s > 20)))
-
-    if l < max(abs(s),abs(m))
-        return 0.0
-    end
-    if ((l+m > 20) || (l+s > 20) || (l-m > 20) || (l-s > 20))
-        term1 = (2*l+1)*(sterlings(l+m)/sterlings(l+s))*(sterlings(l-m)/sterlings(l-s))
-    else
-        term1 = (2*l+1)*(factorial(l+m)/factorial(l+s))*(factorial(l-m)/factorial(l-s))
-    end
-    #println((l=l,m=m,s=s), (fact = factorial(l+m),), term1)
-    A = sqrt(term1/(4*pi))*(-1)^m
-
-    #The sin term right outside the summation
-    sinterm = ((1-z)/2)^l
-    #The summation terms
-    sumterms = 0.0
-    for r = 0:(l-s)
-        consts = binomial(l-s,r)*binomial(l+s,r+s-m)*(-1)^(l-r-s)
-        cotterm = (sqrt((1+z)/(1-z)))^((2*r+s-m))
-        sumterms += consts*cotterm
-    end
-    return A*sinterm*sumterms
-end
-=#
 function (Ψ::SpinWeightedSpherical)(z)
     s = Ψ.s; l = Ψ.l; m = Ψ.m;
     if (l >= min(abs(m),abs(s))) & (l >= abs(m))
@@ -175,7 +140,7 @@ struct QuasinormalModeFunction{T,L} <: CallableAtom
 end
 
 struct Custom end
-function qnmfunction(::typeof(Custom); s=-2,l=2,m=2,n=0,a=0.00, ω = Complex(0.0), Alm = Complex(0.0), Cllʼ = [Complex(0.0)], N=150,isconjugate=false,minus=false)
+function qnmfunction(::typeof(Custom); s=-2,l=2,m=2,n=0,a=0.00, ω = Complex(0.0), Alm = Complex(0.0), Cllʼ = [Complex(0.0)], N=150,isconjugate=false,isminus=false)
     ((ζ,ξ,η),(p,α,γ,δ,σ),(D₀,D₁,D₂,D₃,D₄)) = ParameterTransformations(l,m,s,a,ω,Alm)
     r₊ = 1 + sqrt(1-a^2); r₋ = 1 - sqrt(1-a^2)
 
@@ -191,7 +156,7 @@ function qnmfunction(::typeof(Custom); s=-2,l=2,m=2,n=0,a=0.00, ω = Complex(0.0
     QuasinormalModeFunction(s,l,m,n,a,ω,Alm,Ψᵣ,Ψᵪ)
 end
 
-(Ψ::QuasinormalModeFunction)(r; isconjugate=false,minus=false) = Ψ.R(r;isconjugate=isconjugate, minus=minus) 
+(Ψ::QuasinormalModeFunction)(r; isconjugate=false,isminus=false) = Ψ.R(r;isconjugate=isconjugate, isminus=isminus) 
 (Ψ::QuasinormalModeFunction)(r, z; isconjugate=false) = Ψ.R(r;isconjugate=isconjugate) * Ψ.S(z;isconjugate=isconjugate)
 (Ψ::QuasinormalModeFunction)(r, z, ϕ) =  Ψ.R(r)*Ψ.S(z)*exp(im*Ψ.m*ϕ)
 (Ψ::QuasinormalModeFunction)(r, z, ϕ, t) =  Ψ.R(r)*Ψ.S(z)*exp(im*Ψ.m*ϕ)*exp(-im*Ψ.ω*t)
