@@ -88,12 +88,20 @@ end
 
 function (Ψ::SpinWeightedSpheroidal)(z;isconjugate=false,isminus=false)
     s = Ψ.s; l = Ψ.l; m = Ψ.m;
-    lmin = Ψ.lmin; lmax = Ψ.lmax; Cs=Ψ.Cllʼ;
-    Csminus=negate_based_on_l(Cs,lmin,lmax)
+    lmin = Ψ.lmin; lmax = Ψ.lmax; C=Ψ.Cllʼ;
+    Cminus=negate_based_on_l(C,lmin,lmax)
     if isconjugate == false
-        SpinWeightedSpheroidalCalculation(z,s,l,m,Ψ.Cllʼ,lmin,lmax)
+        if isminus==false
+            SpinWeightedSpheroidalCalculation(z,s,l,m,Ψ.Cllʼ,lmin,lmax)
+        elseif isminus==true
+            (-1)^m*conj(SpinWeightedSpheroidalCalculation(z,-s,l,m,Cminus,lmin,lmax))
+        end
     elseif isconjugate==true
-        conj(SpinWeightedSpheroidalCalculation(z,s,l,m,Ψ.Cllʼ,lmin,lmax))
+        if isminus==false
+            conj(SpinWeightedSpheroidalCalculation(z,s,l,m,Ψ.Cllʼ,lmin,lmax))
+        elseif isminus==true
+            (-1)^m*SpinWeightedSpheroidalCalculation(z,-s,l,m,Cminus,lmin,lmax)
+        end
     end
 end
 
@@ -166,7 +174,7 @@ function qnmfunction(::typeof(Custom); s=-2,l=2,m=2,n=0,a=0.00, ω = Complex(0.0
 end
 
 (Ψ::QuasinormalModeFunction)(r; isconjugate=false,isminus=false) = Ψ.R(r;isconjugate=isconjugate, isminus=isminus) 
-(Ψ::QuasinormalModeFunction)(r, z; isconjugate=false) = Ψ.R(r;isconjugate=isconjugate) * Ψ.S(z;isconjugate=isconjugate)
+(Ψ::QuasinormalModeFunction)(r, z; isconjugate=false, isminus=false) = Ψ.R(r;isconjugate=isconjugate,isminus=isminus) * Ψ.S(z;isconjugate=isconjugate,isminus=isminus)
 (Ψ::QuasinormalModeFunction)(r, z, ϕ) =  Ψ.R(r)*Ψ.S(z)*exp(im*Ψ.m*ϕ)
 (Ψ::QuasinormalModeFunction)(r, z, ϕ, t) =  Ψ.R(r)*Ψ.S(z)*exp(im*Ψ.m*ϕ)*exp(-im*Ψ.ω*t)
 
