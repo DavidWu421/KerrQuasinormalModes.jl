@@ -78,9 +78,18 @@ function SpinWeightedSpheroidalCalculation(z,s,l,m,Cllʼ,lmin,lmax)
     val
 end
 
-function (Ψ::SpinWeightedSpheroidal)(z,;isconjugate=false)
+function negate_based_on_l(lst, lmin, lmax)
+    if abs(lmax-lmin) % 2 == 0
+        [i % 2 == 1 ? -x : x for (i, x) in enumerate(lst)]
+    else
+        [i % 2 == 0 ? -x : x for (i, x) in enumerate(lst)]
+    end
+end
+
+function (Ψ::SpinWeightedSpheroidal)(z;isconjugate=false,isminus=false)
     s = Ψ.s; l = Ψ.l; m = Ψ.m;
-    lmin = Ψ.lmin; lmax = Ψ.lmax;
+    lmin = Ψ.lmin; lmax = Ψ.lmax; Cs=Ψ.Cllʼ;
+    Csminus=negate_based_on_l(Cs,lmin,lmax)
     if isconjugate == false
         SpinWeightedSpheroidalCalculation(z,s,l,m,Ψ.Cllʼ,lmin,lmax)
     elseif isconjugate==true
