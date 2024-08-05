@@ -80,10 +80,11 @@ end
 
 function negate_based_on_l(lst, lmin, lmax)
     if abs(lmax-lmin) % 2 == 0
-        [i % 2 == 1 ? -x : x for (i, x) in enumerate(lst)]
+        lst=[i % 2 == 0 ? -x : x for (i, x) in enumerate(lst)]
     else
-        [i % 2 == 0 ? -x : x for (i, x) in enumerate(lst)]
+        lst=[i % 2 == 1 ? -x : x for (i, x) in enumerate(lst)]
     end
+    lst
 end
 
 function (Ψ::SpinWeightedSpheroidal)(z;isconjugate=false,isminus=false)
