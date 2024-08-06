@@ -158,20 +158,37 @@ struct QuasinormalModeFunction{T,L} <: CallableAtom
 end
 
 struct Custom end
-function qnmfunction(::typeof(Custom); s=-2,l=2,m=2,n=0,a=0.00, ω = Complex(0.0), Alm = Complex(0.0), Cllʼ = [Complex(0.0)], N=150)
-    ((ζ,ξ,η),(p,α,γ,δ,σ),(D₀,D₁,D₂,D₃,D₄)) = ParameterTransformations(l,m,s,a,ω,Alm)
-    r₊ = 1 + sqrt(1-a^2); r₋ = 1 - sqrt(1-a^2)
+function qnmfunction(::typeof(Custom); s=-2,l=2,m=2,n=0,a=0.00, ω = Complex(0.0), Alm = Complex(0.0), Cllʼ = [Complex(0.0)], N=150,modesign="plus")
+    if modesign=="plus"
+        ((ζ,ξ,η),(p,α,γ,δ,σ),(D₀,D₁,D₂,D₃,D₄)) = ParameterTransformations(l,m,s,a,ω,Alm)
+        r₊ = 1 + sqrt(1-a^2); r₋ = 1 - sqrt(1-a^2)
 
-    ##Radial WaveFunction
-    an = RadialCoefficients(D₀, D₁, D₂, D₃, D₄; N=(N+100))
-    an2 = an[1:N];
-    aₙ = SVector{length(an2),Complex{Float64}}(an2)
-    Ψᵣ = HeunConfluentRadial(η,α,ξ,ζ,r₊,r₋,aₙ)
+        ##Radial WaveFunction
+        an = RadialCoefficients(D₀, D₁, D₂, D₃, D₄; N=(N+100))
+        an2 = an[1:N];
+        aₙ = SVector{length(an2),Complex{Float64}}(an2)
+        Ψᵣ = HeunConfluentRadial(η,α,ξ,ζ,r₊,r₋,aₙ)
 
-    ##Angular WaveFunction
-    Ψᵪ = SpinWeightedSpheroidal(s,l,m,Cllʼ)
+        ##Angular WaveFunction
+        Ψᵪ = SpinWeightedSpheroidal(s,l,m,Cllʼ)
 
-    QuasinormalModeFunction(s,l,m,n,a,ω,Alm,Ψᵣ,Ψᵪ)
+        QuasinormalModeFunction(s,l,m,n,a,ω,Alm,Ψᵣ,Ψᵪ)
+    elseif modesign=="minus"
+        ((ζ,ξ,η),(p,α,γ,δ,σ),(D₀,D₁,D₂,D₃,D₄)) = ParameterTransformations(l,-m,s,a,-conj(ω),Alm)
+        r₊ = 1 + sqrt(1-a^2); r₋ = 1 - sqrt(1-a^2)
+
+        ##Radial WaveFunction
+        an = RadialCoefficients(D₀, D₁, D₂, D₃, D₄; N=(N+100))
+        an2 = an[1:N];
+        aₙ = SVector{length(an2),Complex{Float64}}(an2)
+        Ψᵣ = HeunConfluentRadial(η,α,ξ,ζ,r₊,r₋,aₙ)
+
+        ##Angular WaveFunction
+        Cminus=negate_based_on_l(Cllʼ,l)
+        Ψᵪ = SpinWeightedSpheroidal(s,l,-m,Cminus)
+
+        QuasinormalModeFunction(s,l,m,n,a,ω,Alm,Ψᵣ,Ψᵪ)
+    end
 end
 
 (Ψ::QuasinormalModeFunction)(r; isconjugate=false,isminus=false) = Ψ.R(r;isconjugate=isconjugate, isminus=isminus) 
