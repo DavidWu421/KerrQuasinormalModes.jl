@@ -78,19 +78,9 @@ function SpinWeightedSpheroidalCalculation(z,s,l,m,Cllʼ,lmin,lmax)
     val
 end
 
-function negate_based_on_l(lst, l)
-    if abs(l) % 2 == 0
-        lst=[i % 2 == 0 ? -x : x for (i, x) in enumerate(lst)]
-    else
-        lst=[i % 2 == 1 ? -x : x for (i, x) in enumerate(lst)]
-    end
-    lst
-end
-
 function (Ψ::SpinWeightedSpheroidal)(z;isconjugate=false)
     s = Ψ.s; l = Ψ.l; m = Ψ.m;
-    lmin = Ψ.lmin; lmax = Ψ.lmax; C=Ψ.Cllʼ;
-    Cminus=negate_based_on_l(C,l)
+    lmin = Ψ.lmin; lmax = Ψ.lmax;
     if isconjugate == false
         SpinWeightedSpheroidalCalculation(z,s,l,m,Ψ.Cllʼ,lmin,lmax)
     elseif isconjugate==true
@@ -142,7 +132,7 @@ end
 
 ### Combining the Mode radial and angular Information
 struct QuasinormalModeFunction{T,L} <: CallableAtom
-    modesign::AbstractString; s::Int64; l::Int64; m::Int64; n::Int64; a::Float64
+    s::Int64; l::Int64; m::Int64; n::Int64; a::Float64
     ω::Complex{Float64}
     Alm::Complex{Float64}
     R::HeunConfluentRadial{T}
@@ -150,17 +140,12 @@ struct QuasinormalModeFunction{T,L} <: CallableAtom
 end
 
 struct Custom end
-function qnmfunction(::typeof(Custom); s=-2,l=2,m=2,n=0,a=0.00, ω = Complex(0.0), Alm = Complex(0.0), Cllʼ = [Complex(0.0)], N=150,modesign="plus")
-    if modesign=="minus"
-        m=-m
-        ω=-conj(ω)
-        Alm=conj(Alm)
-        Cllʼ=[i % 2 == 0 ? -x : x for (i, x) in enumerate(Cllʼ)]
-        Cllʼ=conj.(Cllʼ)
-    end
+function qnmfunction(::typeof(Custom); s=-2,l=2,m=2,n=0,a=0.00, ω = Complex(0.0), Alm = Complex(0.0), Cllʼ = [Complex(0.0)], N=150)
+    
     println("s: ",s)
     println("m: ", m)
     println("Alm: ", Alm)
+    println("Cllʼ: ",Cllʼ)
 
     ((ζ,ξ,η),(p,α,γ,δ,σ),(D₀,D₁,D₂,D₃,D₄)) = ParameterTransformations(l,m,s,a,ω,Alm)
     r₊ = 1 + sqrt(1-a^2); r₋ = 1 - sqrt(1-a^2)
@@ -170,11 +155,8 @@ function qnmfunction(::typeof(Custom); s=-2,l=2,m=2,n=0,a=0.00, ω = Complex(0.0
     aₙ = SVector{length(an2),Complex{Float64}}(an2)
     Ψᵣ = HeunConfluentRadial(η,α,ξ,ζ,r₊,r₋,aₙ)
     ##Angular WaveFunction
-    println("s: ",s)
-    println("m: ", m)
-    println("Cllʼ: ",Cllʼ)
     Ψᵪ = SpinWeightedSpheroidal(s,l,m,Cllʼ)
-    QuasinormalModeFunction(modesign,s,l,m,n,a,ω,Alm,Ψᵣ,Ψᵪ)
+    QuasinormalModeFunction(s,l,m,n,a,ω,Alm,Ψᵣ,Ψᵪ)
 
 end
 
