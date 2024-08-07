@@ -157,6 +157,9 @@ function qnmfunction(::typeof(Custom); s=-2,l=2,m=2,n=0,a=0.00, ω = Complex(0.0
         Alm=conj(Alm)
         Cllʼ=[i % 2 == 0 ? -x : x for (i, x) in enumerate(Cllʼ)]
     end
+    println("s: ",s)
+    println("m: ", m)
+    println("Alm: ", Alm)
 
     ((ζ,ξ,η),(p,α,γ,δ,σ),(D₀,D₁,D₂,D₃,D₄)) = ParameterTransformations(l,m,s,a,ω,Alm)
     r₊ = 1 + sqrt(1-a^2); r₋ = 1 - sqrt(1-a^2)
@@ -166,6 +169,9 @@ function qnmfunction(::typeof(Custom); s=-2,l=2,m=2,n=0,a=0.00, ω = Complex(0.0
     aₙ = SVector{length(an2),Complex{Float64}}(an2)
     Ψᵣ = HeunConfluentRadial(η,α,ξ,ζ,r₊,r₋,aₙ)
     ##Angular WaveFunction
+    println("s: ",s)
+    println("m: ", m)
+    println("Cllʼ: ",Cllʼ)
     Ψᵪ = SpinWeightedSpheroidal(s,l,m,Cllʼ)
     QuasinormalModeFunction(modesign,s,l,m,n,a,ω,Alm,Ψᵣ,Ψᵪ)
 
