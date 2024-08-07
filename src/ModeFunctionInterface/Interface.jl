@@ -156,6 +156,7 @@ function qnmfunction(::typeof(Custom); s=-2,l=2,m=2,n=0,a=0.00, ω = Complex(0.0
         ω=-conj(ω)
         Alm=conj(Alm)
         Cllʼ=[i % 2 == 0 ? -x : x for (i, x) in enumerate(Cllʼ)]
+        Cllʼ=conj.(Cllʼ)
     end
     println("s: ",s)
     println("m: ", m)
