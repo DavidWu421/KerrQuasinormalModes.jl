@@ -10,7 +10,7 @@ LinearCombinationOf(x;c = Complex(0.0)) = LinearCombinationOf(x,c)
 
 #(x::IdentityFunction)(s) = Complex(1.0)
 #(x::HeunConfluentRadial)(s) = s^2 + 2s
-(x::LinearCombinationOf{T})(s...;isconjugate=false,isminus=false) where T = sum(k(s...;isconjugate=false,isminus=false)*v for (k,v) ∈ x.dict) + x.constant
+(x::LinearCombinationOf{T})(s...;isconjugate=false) where T = sum(k(s...;isconjugate=false)*v for (k,v) ∈ x.dict) + x.constant
 
 function postprocess(x::LinearCombinationOf{T}) where T
     if all(x == zero(x) for x ∈ values(x.dict))
