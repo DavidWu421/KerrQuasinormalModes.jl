@@ -19,12 +19,14 @@ function (ψᵣ::HeunConfluentRadial)(r;isconjugate=false)
     r₊ = ψᵣ.r₊;
     r₋ = ψᵣ.r₋
     asymptoticpart = (r₊-r₋)^(α)*(im*(r-r₋))^(η-α)*(im*(r-r₊))^(ξ)*exp(ζ*r)
+    println("aymptoticpart: ",asymptoticpart)
     x = (r-r₊)/(r-r₋)
+    println("x: ",x)
     finalsum = Complex(0.0)
     for n in 1:length(ψᵣ.coeffs)
        finalsum += ψᵣ.coeffs[n]*x^(n-1)
     end
-    #print(asymptoticpart)
+    println("finalsum: ",finalsum)
     if isconjugate==false
         asymptoticpart*finalsum
     elseif isconjugate==true
@@ -141,23 +143,19 @@ end
 
 struct Custom end
 function qnmfunction(::typeof(Custom); s=-2,l=2,m=2,n=0,a=0.00, ω = Complex(0.0), Alm = Complex(0.0), Cllʼ = [Complex(0.0)], N=150)
-    
-    println("s: ",s)
-    println("m: ", m)
-    println("Alm: ", Alm)
-    println("Cllʼ: ",Cllʼ)
-
     ((ζ,ξ,η),(p,α,γ,δ,σ),(D₀,D₁,D₂,D₃,D₄)) = ParameterTransformations(l,m,s,a,ω,Alm)
     r₊ = 1 + sqrt(1-a^2); r₋ = 1 - sqrt(1-a^2)
+
     ##Radial WaveFunction
     an = RadialCoefficients(D₀, D₁, D₂, D₃, D₄; N=(N+100))
     an2 = an[1:N];
     aₙ = SVector{length(an2),Complex{Float64}}(an2)
     Ψᵣ = HeunConfluentRadial(η,α,ξ,ζ,r₊,r₋,aₙ)
+
     ##Angular WaveFunction
     Ψᵪ = SpinWeightedSpheroidal(s,l,m,Cllʼ)
-    QuasinormalModeFunction(s,l,m,n,a,ω,Alm,Ψᵣ,Ψᵪ)
 
+    QuasinormalModeFunction(s,l,m,n,a,ω,Alm,Ψᵣ,Ψᵪ)
 end
 
 (Ψ::QuasinormalModeFunction)(r; isconjugate=false) = Ψ.R(r;isconjugate=isconjugate) 
