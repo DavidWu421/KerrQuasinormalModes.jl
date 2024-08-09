@@ -53,27 +53,63 @@ end
 function ∂θ(S::SpinWeightedSpheroidal)
     s = S.s; m = S.m; l=S.l; Cllʼ = S.Cllʼ;
     lmin = S.lmin; lmax = S.lmax;
-    ψm1 = SpinWeightedSpheroidal(s-1,l,m,Cllʼ,lmin,lmax)
-    ψp1 = SpinWeightedSpheroidal(s+1,l,m,Cllʼ,lmin, lmax)
-    Ap1 = -0.5*sqrt((l-s)*(l+s+1))
-    Am1 = +0.5*sqrt((l+s)*(l-s+1))
-    Ap1*ψp1+Am1*ψm1
+    N = lmax - lmin + 1
+    Cllʼp1 = Complex{Float64}[0.0 + 0.0im for _ in 1:N] 
+    Cllʼm1 = Complex{Float64}[0.0 + 0.0im for _ in 1:N] 
+    for j = 1:N
+        lʼ = j+lmin-1;
+        term_p1 = (lʼ - s) * (lʼ + s + 1)
+        term_m1 = (lʼ + s) * (lʼ - s + 1)
+
+        if term_p1 >= 0
+            Cllʼp1[j] = Cllʼ[j] * sqrt(term_p1)
+        else
+            Cllʼp1[j] = 0.0 + 0.0im
+        end
+
+        if term_m1 >= 0
+            Cllʼm1[j] = Cllʼ[j] * sqrt(term_m1)
+        else
+            Cllʼm1[j] = 0.0 + 0.0im
+        end
+    end
+    ψm1 = SpinWeightedSpheroidal(s-1,l,m,Cllʼm1,lmin,lmax)
+    ψp1 = SpinWeightedSpheroidal(s+1,l,m,Cllʼp1,lmin, lmax)
+    0.5*(ψm1-ψp1)
 end
 
 #Define the derivation of the qnm function
 function ∂θ(Ψ::QuasinormalModeFunction)
     s = Ψ.s; l = Ψ.l; m = Ψ.m; n = Ψ.n; a = Ψ.a; ω = Ψ.ω; Alm = Ψ.Alm;
-    Cllʼ = Ψ.S.Cllʼ;
-    lmin = Ψ.S.lmin; lmax = Ψ.S.lmax;
-    ψm1 = SpinWeightedSpheroidal(s-1,l,m,Cllʼ,lmin,lmax)
-    ψp1 = SpinWeightedSpheroidal(s+1,l,m,Cllʼ,lmin, lmax)
-    Ap1 = -0.5*sqrt((l-s)*(l+s+1))
-    Am1 = +0.5*sqrt((l+s)*(l-s+1))
+    Cllʼ = Ψ.S.Cllʼ; lmin = Ψ.S.lmin; lmax = Ψ.S.lmax;
+    N = lmax - lmin + 1
+    Cllʼp1 = Complex{Float64}[0.0 + 0.0im for _ in 1:N] 
+    Cllʼm1 = Complex{Float64}[0.0 + 0.0im for _ in 1:N] 
+    for j = 1:N
+        lʼ = j+lmin-1;
+        term_p1 = (lʼ - s) * (lʼ + s + 1)
+        term_m1 = (lʼ + s) * (lʼ - s + 1)
+
+        if term_p1 >= 0
+            Cllʼp1[j] = Cllʼ[j] * sqrt(term_p1)
+        else
+            Cllʼp1[j] = 0.0 + 0.0im
+        end
+
+        if term_m1 >= 0
+            Cllʼm1[j] = Cllʼ[j] * sqrt(term_m1)
+        else
+            Cllʼm1[j] = 0.0 + 0.0im
+        end
+    end
+    
+    ψm1 = SpinWeightedSpheroidal(s-1,l,m,Cllʼm1,lmin,lmax)
+    ψp1 = SpinWeightedSpheroidal(s+1,l,m,Cllʼp1,lmin, lmax)
     """Add a sum over different copies of qnm with some
     change"""
     Ψm1 = QuasinormalModeFunction(s-1,l,m,n,a,ω,Alm,Ψ.R,ψm1)
     Ψp1 = QuasinormalModeFunction(s+1,l,m,n,a,ω,Alm,Ψ.R,ψp1)
-    Ap1*Ψp1+Am1*Ψm1
+    0.5*(Ψm1-Ψp1)
 end
 
 function ∂t(Ψ::QuasinormalModeFunction)
