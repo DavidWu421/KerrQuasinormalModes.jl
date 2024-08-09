@@ -19,14 +19,14 @@ function (ψᵣ::HeunConfluentRadial)(r;isconjugate=false)
     r₊ = ψᵣ.r₊;
     r₋ = ψᵣ.r₋
     asymptoticpart = (r₊-r₋)^(α)*(im*(r-r₋))^(η-α)*(im*(r-r₊))^(ξ)*exp(ζ*r)
-    println("aymptoticpart: ",asymptoticpart)
+    # println("aymptoticpart: ",asymptoticpart)
     x = (r-r₊)/(r-r₋)
-    println("x: ",x)
+    # println("x: ",x)
     finalsum = Complex(0.0)
     for n in 1:length(ψᵣ.coeffs)
        finalsum += ψᵣ.coeffs[n]*x^(n-1)
     end
-    println("finalsum: ",finalsum)
+    # println("finalsum: ",finalsum)
     if isconjugate==false
         asymptoticpart*finalsum
     elseif isconjugate==true
