@@ -23,6 +23,7 @@ function (ψᵣ::HeunConfluentRadial)(r;isconjugate=false)
     x = (r-r₊)/(r-r₋)
     # println("x: ",x)
     finalsum = Complex(0.0)
+    # println(ψᵣ.coeffs)
     for n in 1:length(ψᵣ.coeffs)
        finalsum += ψᵣ.coeffs[n]*x^(n-1)
     end
