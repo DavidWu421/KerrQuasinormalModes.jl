@@ -12,7 +12,6 @@ struct HeunConfluentRadial{T} <: CallableAtom
 end
 
 function (ψᵣ::HeunConfluentRadial)(r;isconjugate=false)
-    println("AHHHHH")
     η = ψᵣ.η;
     α = ψᵣ.α;
     ξ = ψᵣ.ξ;
@@ -22,6 +21,7 @@ function (ψᵣ::HeunConfluentRadial)(r;isconjugate=false)
     if real(ζ/im)>0
         asymptoticpart = (r₊-r₋)^(α)*(im*(r-r₋))^(η-α)*(im*(r-r₊))^(ξ)*exp(ζ*r)
     elseif real(ζ/im)<0
+        r=conj(r)
         asymptoticpart = (r₊-r₋)^(α)*(-im*(r-r₋))^(η-α)*(-im*(r-r₊))^(ξ)*exp(ζ*r)
     end
     println("aymptoticpart: ",asymptoticpart)
@@ -164,10 +164,10 @@ function qnmfunction(::typeof(Custom); s=-2,l=2,m=2,n=0,a=0.00, ω = Complex(0.0
     QuasinormalModeFunction(s,l,m,n,a,ω,Alm,Ψᵣ,Ψᵪ)
 end
 
-(Ψ::QuasinormalModeFunction)(r; isconjugate=false) = real(Ψ.ω) < 0 ? Ψ.R(conj(r); isconjugate=isconjugate) : Ψ.R(r; isconjugate=isconjugate)
-(Ψ::QuasinormalModeFunction)(r, z; isconjugate=false) = real(Ψ.ω) < 0 ? Ψ.R(conj(r);isconjugate=isconjugate) * Ψ.S(z;isconjugate=isconjugate) : Ψ.R(r;isconjugate=isconjugate) * Ψ.S(z;isconjugate=isconjugate)
-(Ψ::QuasinormalModeFunction)(r, z, ϕ) =  real(Ψ.ω) < 0 ?  Ψ.R(conj(r))*Ψ.S(z)*exp(im*Ψ.m*ϕ) : Ψ.R(r)*Ψ.S(z)*exp(im*Ψ.m*ϕ)
-(Ψ::QuasinormalModeFunction)(r, z, ϕ, t) =  real(Ψ.ω) < 0 ? Ψ.R(conj(r))*Ψ.S(z)*exp(im*Ψ.m*ϕ)*exp(-im*Ψ.ω*t) : Ψ.R(r)*Ψ.S(z)*exp(im*Ψ.m*ϕ)*exp(-im*Ψ.ω*t)
+(Ψ::QuasinormalModeFunction)(r; isconjugate=false) = Ψ.R(r; isconjugate=isconjugate)
+(Ψ::QuasinormalModeFunction)(r, z; isconjugate=false) = Ψ.R(r;isconjugate=isconjugate) * Ψ.S(z;isconjugate=isconjugate)
+(Ψ::QuasinormalModeFunction)(r, z, ϕ) =  Ψ.R(r)*Ψ.S(z)*exp(im*Ψ.m*ϕ)
+(Ψ::QuasinormalModeFunction)(r, z, ϕ, t) = Ψ.R(r)*Ψ.S(z)*exp(im*Ψ.m*ϕ)*exp(-im*Ψ.ω*t)
 
 (Ψ::QuasinormalModeFunction)(x::NamedTuple{(:r,),Tuple{Number}}) = Ψ.R(x[:r])
 (Ψ::QuasinormalModeFunction)(x::NamedTuple{(:θ,),Tuple{Number}}) = Ψ.S(cos(x[:θ]))
