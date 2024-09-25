@@ -19,7 +19,11 @@ function ∂r(ψᵣ::HeunConfluentRadial)
     aₙshift = aₙshift .*nn
     aₙshift_static = similar_type(aₙ)(aₙshift)
     Ψaₙ = HeunConfluentRadial(η-1,α+1,ξ,ζ,r₊,r₋,aₙshift_static)
-    (im*(η-α))*Ψη + (im*ξ)*Ψξ + ζ*ψᵣ - Ψaₙ
+    if real(ζ/im)>0
+        (im*(η-α))*Ψη + (im*ξ)*Ψξ + ζ*ψᵣ - Ψaₙ
+    elseif real(ζ/im)<0
+        (-im*(η-α))*Ψη + (-im*ξ)*Ψξ + ζ*ψᵣ - Ψaₙ
+    end
 end
 
 #Define the derivation of the qnm function
