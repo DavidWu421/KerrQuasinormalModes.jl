@@ -37,15 +37,6 @@ function ∂r(Ψ::QuasinormalModeFunction)
     r₊ = ψᵣ.r₊
     r₋ = ψᵣ.r₋
     aₙ = ψᵣ.coeffs
-    println("η: ", η)
-    println("ξ: ", ξ)
-    println("ζ: ", ζ)
-    println("Alm: ", Alm)
-    println("aₙ: ", aₙ)
-    println("s: ", s)
-    println("m: ", m)
-    println("ω: ", ω)
-
     """Add a sum over different copies of qnm with some
     change"""
     Ψη = HeunConfluentRadial(η-1,α,ξ,ζ,r₊,r₋,aₙ)
@@ -60,7 +51,11 @@ function ∂r(Ψ::QuasinormalModeFunction)
     aₙshift_static = similar_type(aₙ)(aₙshift)
     Ψaₙ = HeunConfluentRadial(η-1,α+1,ξ,ζ,r₊,r₋,aₙshift_static)
     Ψaₙf = QuasinormalModeFunction(s,l,m,n,a,ω,Alm,Ψaₙ,Ψ.S)
-    (im*(η-α))*Ψηf + (im*ξ)*Ψξf + ζ*Ψ - Ψaₙf
+    if real(ζ/im)>0
+        (im*(η-α))*Ψηf + (im*ξ)*Ψξf + ζ*Ψ - Ψaₙf
+    elseif real(ζ/im)<0
+        (-im*(η-α))*Ψηf + (-im*ξ)*Ψξf + ζ*Ψ - Ψaₙf
+    end
 end
 
 function ∂θ(S::SpinWeightedSpheroidal)
