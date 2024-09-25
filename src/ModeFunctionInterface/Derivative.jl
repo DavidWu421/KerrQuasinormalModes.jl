@@ -33,6 +33,15 @@ function ∂r(Ψ::QuasinormalModeFunction)
     r₊ = ψᵣ.r₊
     r₋ = ψᵣ.r₋
     aₙ = ψᵣ.coeffs
+    println("η: ", η)
+    println("ξ: ", ξ)
+    println("ζ: ", ζ)
+    println("Alm: ", Alm)
+    println("aₙ: ", aₙ)
+    println("s: ", s)
+    println("m: ", m)
+    println("ω: ", ω)
+
     """Add a sum over different copies of qnm with some
     change"""
     Ψη = HeunConfluentRadial(η-1,α,ξ,ζ,r₊,r₋,aₙ)
