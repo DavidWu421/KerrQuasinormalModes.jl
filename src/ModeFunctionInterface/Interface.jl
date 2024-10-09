@@ -139,7 +139,7 @@ function ComputeSeriesFromab(an::Function,bn::Function; N=250, rN = 0.0*im, PreN
 end
 
 ### Combining the Mode radial and angular Information
-mutable struct QuasinormalModeFunction{T,L} <: CallableAtom
+struct QuasinormalModeFunction{T,L} <: CallableAtom
     s::Int64; l::Int64; m::Int64; n::Int64; a::Float64
     ω::Complex{Float64}
     Alm::Complex{Float64}
