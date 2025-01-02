@@ -9,9 +9,10 @@ struct HeunConfluentRadial{T} <: CallableAtom
     η::Complex{Float64}; α::Complex{Float64}; ξ::Complex{Float64}; ζ::Complex{Float64}
     r₊::Float64; r₋::Float64
     coeffs::T
+    is_conjugate::Bool
 end
 
-function (ψᵣ::HeunConfluentRadial)(r;isconjugate=false)
+function (ψᵣ::HeunConfluentRadial)(r)
     η = ψᵣ.η;
     α = ψᵣ.α;
     ξ = ψᵣ.ξ;
@@ -24,18 +25,14 @@ function (ψᵣ::HeunConfluentRadial)(r;isconjugate=false)
         r=conj(r)
         asymptoticpart = (r₊-r₋)^(α)*(-im*(r-r₋))^(η-α)*(-im*(r-r₊))^(ξ)*exp(ζ*r)
     end
-    # println("aymptoticpart: ",asymptoticpart)
     x = (r-r₊)/(r-r₋)
-    # println("x: ",x)
     finalsum = Complex(0.0)
-    # println(ψᵣ.coeffs)
     for n in 1:length(ψᵣ.coeffs)
        finalsum += ψᵣ.coeffs[n]*x^(n-1)
     end
-    # println("finalsum: ",finalsum)
-    if isconjugate==false
+    if ψᵣ.is_conjugate==false
         asymptoticpart*finalsum
-    elseif isconjugate==true
+    elseif ψᵣ.is_conjugate==true
         conj(asymptoticpart*finalsum)
     end
 end
@@ -68,12 +65,13 @@ struct SpinWeightedSpheroidal{T} <: CallableAtom
     s::Int64; l::Int64; m::Int64
     Cllʼ::T
     lmin::Int64; lmax::Int64
+    is_conjugate::Bool
 end
 
-function SpinWeightedSpheroidal(s,l,m,Cllʼ)
+function SpinWeightedSpheroidal(s,l,m,Cllʼ;is_conjugate=false)
     lmins = max(abs(s),abs(m));
     lmax = length(Cllʼ) + lmins -1
-    SpinWeightedSpheroidal(s,l,m,Cllʼ,lmins, lmax)
+    SpinWeightedSpheroidal(s,l,m,Cllʼ,lmins, lmax,is_conjugate)
 end
 
 function SpinWeightedSpheroidalCalculation(z,s,l,m,Cllʼ,lmin,lmax)
@@ -86,12 +84,12 @@ function SpinWeightedSpheroidalCalculation(z,s,l,m,Cllʼ,lmin,lmax)
     val
 end
 
-function (Ψ::SpinWeightedSpheroidal)(z;isconjugate=false)
+function (Ψ::SpinWeightedSpheroidal)(z)
     s = Ψ.s; l = Ψ.l; m = Ψ.m;
     lmin = Ψ.lmin; lmax = Ψ.lmax;
-    if isconjugate == false
+    if Ψ.is_conjugate == false
         SpinWeightedSpheroidalCalculation(z,s,l,m,Ψ.Cllʼ,lmin,lmax)
-    elseif isconjugate==true
+    elseif Ψ.is_conjugate==true
         conj(SpinWeightedSpheroidalCalculation(z,s,l,m,Ψ.Cllʼ,lmin,lmax))
     end
 end
@@ -145,10 +143,11 @@ struct QuasinormalModeFunction{T,L} <: CallableAtom
     Alm::Complex{Float64}
     R::HeunConfluentRadial{T}
     S::SpinWeightedSpheroidal{L}
+    is_conjugate::Bool
 end
 
 struct Custom end
-function qnmfunction(::typeof(Custom); s=-2,l=2,m=2,n=0,a=0.00, ω = Complex(0.0), Alm = Complex(0.0), Cllʼ = [Complex(0.0)], N=150)
+function qnmfunction(::typeof(Custom); is_conjugate=false, s=-2,l=2,m=2,n=0,a=0.00, ω = Complex(0.0), Alm = Complex(0.0), Cllʼ = [Complex(0.0)], N=150)
     ((ζ,ξ,η),(p,α,γ,δ,σ),(D₀,D₁,D₂,D₃,D₄)) = ParameterTransformations(l,m,s,a,ω,Alm)
     r₊ = 1 + sqrt(1-a^2); r₋ = 1 - sqrt(1-a^2)
 
@@ -156,16 +155,16 @@ function qnmfunction(::typeof(Custom); s=-2,l=2,m=2,n=0,a=0.00, ω = Complex(0.0
     an = RadialCoefficients(D₀, D₁, D₂, D₃, D₄; N=(N+100))
     an2 = an[1:N];
     aₙ = SVector{length(an2),Complex{Float64}}(an2)
-    Ψᵣ = HeunConfluentRadial(η,α,ξ,ζ,r₊,r₋,aₙ)
+    Ψᵣ = HeunConfluentRadial(η,α,ξ,ζ,r₊,r₋,aₙ,is_conjugate)
 
     ##Angular WaveFunction
-    Ψᵪ = SpinWeightedSpheroidal(s,l,m,Cllʼ)
+    Ψᵪ = SpinWeightedSpheroidal(s,l,m,Cllʼ; is_conjugate=is_conjugate)
 
-    QuasinormalModeFunction(s,l,m,n,a,ω,Alm,Ψᵣ,Ψᵪ)
+    QuasinormalModeFunction(s,l,m,n,a,ω,Alm,Ψᵣ,Ψᵪ, is_conjugate)
 end
 
-(Ψ::QuasinormalModeFunction)(r; isconjugate=false) = Ψ.R(r; isconjugate=isconjugate)
-(Ψ::QuasinormalModeFunction)(r, z; isconjugate=false) = Ψ.R(r;isconjugate=isconjugate) * Ψ.S(z;isconjugate=isconjugate)
+(Ψ::QuasinormalModeFunction)(r) = Ψ.R(r)
+(Ψ::QuasinormalModeFunction)(r, z) = Ψ.R(r) * Ψ.S(z)
 (Ψ::QuasinormalModeFunction)(r, z, ϕ) =  Ψ.R(r)*Ψ.S(z)*exp(im*Ψ.m*ϕ)
 (Ψ::QuasinormalModeFunction)(r, z, ϕ, t) = Ψ.R(r)*Ψ.S(z)*exp(im*Ψ.m*ϕ)*exp(-im*Ψ.ω*t)
 
