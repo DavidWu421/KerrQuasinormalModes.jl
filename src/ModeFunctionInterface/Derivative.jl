@@ -59,9 +59,15 @@ function ∂r(Ψ::QuasinormalModeFunction)
     aₙshift_static = similar_type(aₙ)(aₙshift)
     Ψaₙ = HeunConfluentRadial(η-1,α+1,ξ,ζ,r₊,r₋,aₙshift_static,is_conjugate)
     Ψaₙf = QuasinormalModeFunction(s,l,m,n,a,ω,Alm,Ψaₙ,Ψ.S,is_conjugate)
-    if real(ζ/im)*(is_conjugate-.5)>0
+    if is_conjugate==true
+        ξ=conj(ξ)
+        η=conj(η)
+        α=conj(α)
+        ζ=conj(ζ)
+    end
+    if real(ζ/im)>0
         (im*(η-α))*Ψηf + (im*ξ)*Ψξf + ζ*Ψ - Ψaₙf
-    elseif real(ζ/im)*(is_conjugate-.5)<0
+    elseif real(ζ/im)<0
         (-im*(η-α))*Ψηf + (-im*ξ)*Ψξf + ζ*Ψ - Ψaₙf
     end
 end
