@@ -9,16 +9,23 @@ function ∂r(ψᵣ::HeunConfluentRadial)
     r₊ = ψᵣ.r₊
     r₋ = ψᵣ.r₋
     aₙ = ψᵣ.coeffs
+    is_conjugate=ψᵣ.is_conjugate
     """Add a sum over different copies of qnm with some
     change"""
-    Ψη = HeunConfluentRadial(η-1,α,ξ,ζ,r₊,r₋,aₙ)
-    Ψξ = HeunConfluentRadial(η,α,ξ-1,ζ,r₊,r₋,aₙ)
+    Ψη = HeunConfluentRadial(η-1,α,ξ,ζ,r₊,r₋,aₙ,is_conjugate)
+    Ψξ = HeunConfluentRadial(η,α,ξ-1,ζ,r₊,r₋,aₙ,is_conjugate)
     aₙshift = convert(Vector{eltype(aₙ)},circshift(aₙ,-1))
     aₙshift[end] = zero(eltype(aₙshift))
     nn = 1:length(aₙshift)
     aₙshift = aₙshift .*nn
     aₙshift_static = similar_type(aₙ)(aₙshift)
-    Ψaₙ = HeunConfluentRadial(η-1,α+1,ξ,ζ,r₊,r₋,aₙshift_static)
+    Ψaₙ = HeunConfluentRadial(η-1,α+1,ξ,ζ,r₊,r₋,aₙshift_static,is_conjugate)
+    if is_conjugate==true
+        ξ=conj(ξ)
+        η=conj(η)
+        α=conj(α)
+        ζ=conj(ζ)
+    end
     if real(ζ/im)>0
         (im*(η-α))*Ψη + (im*ξ)*Ψξ + ζ*ψᵣ - Ψaₙ
     elseif real(ζ/im)<0
@@ -37,23 +44,24 @@ function ∂r(Ψ::QuasinormalModeFunction)
     r₊ = ψᵣ.r₊
     r₋ = ψᵣ.r₋
     aₙ = ψᵣ.coeffs
+    is_conjugate=Ψ.is_conjugate
     """Add a sum over different copies of qnm with some
     change"""
-    Ψη = HeunConfluentRadial(η-1,α,ξ,ζ,r₊,r₋,aₙ)
-    Ψηf = QuasinormalModeFunction(s,l,m,n,a,ω,Alm,Ψη,Ψ.S)
-    Ψξ = HeunConfluentRadial(η,α,ξ-1,ζ,r₊,r₋,aₙ)
-    Ψξf = QuasinormalModeFunction(s,l,m,n,a,ω,Alm,Ψξ,Ψ.S)
+    Ψη = HeunConfluentRadial(η-1,α,ξ,ζ,r₊,r₋,aₙ,is_conjugate)
+    Ψηf = QuasinormalModeFunction(s,l,m,n,a,ω,Alm,Ψη,Ψ.S,is_conjugate)
+    Ψξ = HeunConfluentRadial(η,α,ξ-1,ζ,r₊,r₋,aₙ,is_conjugate)
+    Ψξf = QuasinormalModeFunction(s,l,m,n,a,ω,Alm,Ψξ,Ψ.S,is_conjugate)
     aₙshift = convert(Vector{eltype(aₙ)},circshift(aₙ,-1))
     aₙshift[end] = zero(eltype(aₙ))
     nn = 1:length(aₙshift)
     #print("here")
     aₙshift = aₙshift .*nn
     aₙshift_static = similar_type(aₙ)(aₙshift)
-    Ψaₙ = HeunConfluentRadial(η-1,α+1,ξ,ζ,r₊,r₋,aₙshift_static)
-    Ψaₙf = QuasinormalModeFunction(s,l,m,n,a,ω,Alm,Ψaₙ,Ψ.S)
-    if real(ζ/im)>0
+    Ψaₙ = HeunConfluentRadial(η-1,α+1,ξ,ζ,r₊,r₋,aₙshift_static,is_conjugate)
+    Ψaₙf = QuasinormalModeFunction(s,l,m,n,a,ω,Alm,Ψaₙ,Ψ.S,is_conjugate)
+    if real(ζ/im)*(is_conjugate-.5)>0
         (im*(η-α))*Ψηf + (im*ξ)*Ψξf + ζ*Ψ - Ψaₙf
-    elseif real(ζ/im)<0
+    elseif real(ζ/im)*(is_conjugate-.5)<0
         (-im*(η-α))*Ψηf + (-im*ξ)*Ψξf + ζ*Ψ - Ψaₙf
     end
 end
@@ -61,6 +69,7 @@ end
 function ∂θ(S::SpinWeightedSpheroidal)
     s = S.s; m = S.m; l=S.l; Cllʼ = S.Cllʼ;
     lmin = S.lmin; lmax = S.lmax;
+    is_conjugate=S.is_conjugate;
     N = lmax - lmin + 1
     Cllʼp1 = Complex{Float64}[0.0 + 0.0im for _ in 1:N] 
     Cllʼm1 = Complex{Float64}[0.0 + 0.0im for _ in 1:N] 
@@ -81,8 +90,8 @@ function ∂θ(S::SpinWeightedSpheroidal)
             Cllʼm1[j] = 0.0 + 0.0im
         end
     end
-    ψm1 = SpinWeightedSpheroidal(s-1,l,m,Cllʼm1,lmin,lmax)
-    ψp1 = SpinWeightedSpheroidal(s+1,l,m,Cllʼp1,lmin, lmax)
+    ψm1 = SpinWeightedSpheroidal(s-1,l,m,Cllʼm1,lmin,lmax,is_conjugate)
+    ψp1 = SpinWeightedSpheroidal(s+1,l,m,Cllʼp1,lmin, lmax,is_conjugate)
     0.5*(ψm1-ψp1)
 end
 
@@ -90,6 +99,7 @@ end
 function ∂θ(Ψ::QuasinormalModeFunction)
     s = Ψ.s; l = Ψ.l; m = Ψ.m; n = Ψ.n; a = Ψ.a; ω = Ψ.ω; Alm = Ψ.Alm;
     Cllʼ = Ψ.S.Cllʼ; lmin = Ψ.S.lmin; lmax = Ψ.S.lmax;
+    is_conjugate=Ψ.S.is_conjugate;
     N = lmax - lmin + 1
     Cllʼp1 = Complex{Float64}[0.0 + 0.0im for _ in 1:N] 
     Cllʼm1 = Complex{Float64}[0.0 + 0.0im for _ in 1:N] 
@@ -111,12 +121,12 @@ function ∂θ(Ψ::QuasinormalModeFunction)
         end
     end
     
-    ψm1 = SpinWeightedSpheroidal(s-1,l,m,Cllʼm1,lmin,lmax)
-    ψp1 = SpinWeightedSpheroidal(s+1,l,m,Cllʼp1,lmin, lmax)
+    ψm1 = SpinWeightedSpheroidal(s-1,l,m,Cllʼm1,lmin,lmax,is_conjugate)
+    ψp1 = SpinWeightedSpheroidal(s+1,l,m,Cllʼp1,lmin, lmax,is_conjugate)
     """Add a sum over different copies of qnm with some
     change"""
-    Ψm1 = QuasinormalModeFunction(s-1,l,m,n,a,ω,Alm,Ψ.R,ψm1)
-    Ψp1 = QuasinormalModeFunction(s+1,l,m,n,a,ω,Alm,Ψ.R,ψp1)
+    Ψm1 = QuasinormalModeFunction(s-1,l,m,n,a,ω,Alm,Ψ.R,ψm1,is_conjugate)
+    Ψp1 = QuasinormalModeFunction(s+1,l,m,n,a,ω,Alm,Ψ.R,ψp1,is_conjugate)
     0.5*(Ψm1-Ψp1)
 end
 
