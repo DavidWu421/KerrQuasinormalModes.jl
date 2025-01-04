@@ -37,6 +37,7 @@ function (ψᵣ::HeunConfluentRadial)(r)
     end
 end
 
+# from https://github.com/luchr/ComplexPortraits.jl.git
 function ComplexPlot(ψ::HeunConfluentRadial; ztopleft = 0.8 + 1.0im, zbottomright = 2.0 - 0.5im)
     img = portrait(ztopleft, zbottomright, Ψ;
         point_color = cs_d(; colormap=hsv_colors()))

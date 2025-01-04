@@ -5,6 +5,7 @@ using NLsolve
 using Statistics
 using CSV
 using StaticArrays
+using ComplexPortraits
 
 using Parameters
 using BSplineKit
