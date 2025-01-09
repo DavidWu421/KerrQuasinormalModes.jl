@@ -11,7 +11,7 @@ struct HeunConfluentRadial{T} <: CallableAtom
     η::Complex{Float64}; α::Complex{Float64}; ξ::Complex{Float64}; ζ::Complex{Float64}
     r₊::Float64; r₋::Float64
     coeffs::T
-    is_conjugate::Bool
+    is_conjugate::Bool; is_minus::Bool
 end
 
 function (ψᵣ::HeunConfluentRadial)(r)
@@ -21,9 +21,9 @@ function (ψᵣ::HeunConfluentRadial)(r)
     ζ = ψᵣ.ζ;
     r₊ = ψᵣ.r₊;
     r₋ = ψᵣ.r₋;
-    if real(ζ/im)>0
+    if ψᵣ.is_minus==false
         asymptoticpart = (r₊-r₋)^(α)*(im*(r-r₋))^(η-α)*(im*(r-r₊))^(ξ)*exp(ζ*r)
-    elseif real(ζ/im)<0
+    elseif ψᵣ.is_minus==true
         r=conj(r)
         asymptoticpart = (r₊-r₋)^(α)*(-im*(r-r₋))^(η-α)*(-im*(r-r₊))^(ξ)*exp(ζ*r)
     end
@@ -69,12 +69,13 @@ struct SpinWeightedSpheroidal{T} <: CallableAtom
     Cllʼ::T
     lmin::Int64; lmax::Int64
     is_conjugate::Bool
+    is_minus::Bool
 end
 
-function SpinWeightedSpheroidal(s,l,m,Cllʼ;is_conjugate=false)
+function SpinWeightedSpheroidal(s,l,m,Cllʼ;is_conjugate=false,is_minus=false)
     lmins = max(abs(s),abs(m));
     lmax = length(Cllʼ) + lmins -1
-    SpinWeightedSpheroidal(s,l,m,Cllʼ,lmins, lmax,is_conjugate)
+    SpinWeightedSpheroidal(s,l,m,Cllʼ,lmins, lmax,is_conjugate,is_minus)
 end
 
 function SpinWeightedSpheroidalCalculation(z,s,l,m,Cllʼ,lmin,lmax)
@@ -147,6 +148,7 @@ struct QuasinormalModeFunction{T,L} <: CallableAtom
     R::HeunConfluentRadial{T}
     S::SpinWeightedSpheroidal{L}
     is_conjugate::Bool
+    is_minus::Bool
 end
 
 struct Custom end
@@ -158,12 +160,12 @@ function qnmfunction(::typeof(Custom); is_conjugate=false,is_minus=false, s=-2,l
     an = RadialCoefficients(D₀, D₁, D₂, D₃, D₄; N=(N+100))
     an2 = an[1:N];
     aₙ = SVector{length(an2),Complex{Float64}}(an2)
-    Ψᵣ = HeunConfluentRadial(η,α,ξ,ζ,r₊,r₋,aₙ,is_conjugate)
+    Ψᵣ = HeunConfluentRadial(η,α,ξ,ζ,r₊,r₋,aₙ,is_conjugate,is_minus)
 
     ##Angular WaveFunction
-    Ψᵪ = SpinWeightedSpheroidal(s,l,m,Cllʼ; is_conjugate=is_conjugate)
+    Ψᵪ = SpinWeightedSpheroidal(s,l,m,Cllʼ; is_conjugate=is_conjugate,is_minus=is_minus)
 
-    QuasinormalModeFunction(s,l,m,n,a,ω,Alm,Ψᵣ,Ψᵪ, is_conjugate)
+    QuasinormalModeFunction(s,l,m,n,a,ω,Alm,Ψᵣ,Ψᵪ, is_conjugate,is_minus)
 end
 
 (Ψ::QuasinormalModeFunction)(r) = Ψ.R(r)
