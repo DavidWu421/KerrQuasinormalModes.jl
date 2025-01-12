@@ -21,10 +21,11 @@ function (ψᵣ::HeunConfluentRadial)(r)
     ζ = ψᵣ.ζ;
     r₊ = ψᵣ.r₊;
     r₋ = ψᵣ.r₋;
+    # println(η, α, ξ,ζ)
+
     if ψᵣ.is_minus==false
         asymptoticpart = (r₊-r₋)^(α)*(im*(r-r₋))^(η-α)*(im*(r-r₊))^(ξ)*exp(ζ*r)
     elseif ψᵣ.is_minus==true
-        r=conj(r)
         asymptoticpart = (r₊-r₋)^(α)*(-im*(r-r₋))^(η-α)*(-im*(r-r₊))^(ξ)*exp(ζ*r)
     end
     x = (r-r₊)/(r-r₋)

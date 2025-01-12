@@ -27,10 +27,18 @@ function ∂r(ψᵣ::HeunConfluentRadial)
         α=conj(α)
         ζ=conj(ζ)
     end
-    if is_minus==false
+    if is_minus==false && is_conjugate==false
+        println("first one")
         (im*(η-α))*Ψη + (im*ξ)*Ψξ + ζ*ψᵣ - Ψaₙ
-    elseif is_minus==true
+    elseif is_minus==true && is_conjugate==false
+        println("second one")
         (-im*(η-α))*Ψη + (-im*ξ)*Ψξ + ζ*ψᵣ - Ψaₙ
+    elseif is_minus==false && is_conjugate==true
+        println("third one")
+        (-(η-α))*Ψη - ξ*Ψξ - im*ζ*ψᵣ + im*Ψaₙ
+    elseif is_minus==true || is_conjugate==true
+        println("fourth one")
+        (η-α)*Ψη + ξ*Ψξ - im*ζ*ψᵣ + im*Ψaₙ
     end
 end
 
@@ -67,10 +75,14 @@ function ∂r(Ψ::QuasinormalModeFunction)
         α=conj(α)
         ζ=conj(ζ)
     end
-    if is_minus==false
+    if is_minus==false && is_conjugate==false
         (im*(η-α))*Ψηf + (im*ξ)*Ψξf + ζ*Ψ - Ψaₙf
-    elseif is_minus==true
+    elseif is_minus==true && is_conjugate==false
         (-im*(η-α))*Ψηf + (-im*ξ)*Ψξf + ζ*Ψ - Ψaₙf
+    elseif is_minus==false && is_conjugate==true
+        (-(η-α))*Ψηf - ξ*Ψξf - im*ζ*Ψ + im*Ψaₙf
+    elseif is_minus==true && is_conjugate==true
+        (η-α)*Ψηf + ξ*Ψξf - im*ζ*Ψ + im*Ψaₙf
     end
 end
 
@@ -78,6 +90,7 @@ function ∂θ(S::SpinWeightedSpheroidal)
     s = S.s; m = S.m; l=S.l; Cllʼ = S.Cllʼ;
     lmin = S.lmin; lmax = S.lmax;
     is_conjugate=S.is_conjugate;
+    is_minus=S.is_minus
     N = lmax - lmin + 1
     Cllʼp1 = Complex{Float64}[0.0 + 0.0im for _ in 1:N] 
     Cllʼm1 = Complex{Float64}[0.0 + 0.0im for _ in 1:N] 
@@ -98,8 +111,8 @@ function ∂θ(S::SpinWeightedSpheroidal)
             Cllʼm1[j] = 0.0 + 0.0im
         end
     end
-    ψm1 = SpinWeightedSpheroidal(s-1,l,m,Cllʼm1,lmin,lmax,is_conjugate)
-    ψp1 = SpinWeightedSpheroidal(s+1,l,m,Cllʼp1,lmin, lmax,is_conjugate)
+    ψm1 = SpinWeightedSpheroidal(s-1,l,m,Cllʼm1,lmin,lmax,is_conjugate,is_minus)
+    ψp1 = SpinWeightedSpheroidal(s+1,l,m,Cllʼp1,lmin, lmax,is_conjugate,is_minus)
     0.5*(ψm1-ψp1)
 end
 
