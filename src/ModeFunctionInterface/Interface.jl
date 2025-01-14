@@ -21,11 +21,10 @@ function (ψᵣ::HeunConfluentRadial)(r)
     ζ = ψᵣ.ζ;
     r₊ = ψᵣ.r₊;
     r₋ = ψᵣ.r₋;
-    # println(η, α, ξ,ζ)
 
-    if ψᵣ.is_minus==false
+    if (ψᵣ.is_minus==false && ψᵣ.is_conjugate==false) || (ψᵣ.is_minus==true && ψᵣ.is_conjugate==true)
         asymptoticpart = (r₊-r₋)^(α)*(im*(r-r₋))^(η-α)*(im*(r-r₊))^(ξ)*exp(ζ*r)
-    elseif ψᵣ.is_minus==true
+    elseif (ψᵣ.is_minus==true && ψᵣ.is_conjugate==false)||(ψᵣ.is_minus==false && ψᵣ.is_conjugate==true)
         asymptoticpart = (r₊-r₋)^(α)*(-im*(r-r₋))^(η-α)*(-im*(r-r₊))^(ξ)*exp(ζ*r)
     end
     x = (r-r₊)/(r-r₋)
@@ -33,11 +32,7 @@ function (ψᵣ::HeunConfluentRadial)(r)
     for n in 1:length(ψᵣ.coeffs)
        finalsum += ψᵣ.coeffs[n]*x^(n-1)
     end
-    if ψᵣ.is_conjugate==false
-        asymptoticpart*finalsum
-    elseif ψᵣ.is_conjugate==true
-        conj(asymptoticpart*finalsum)
-    end
+    asymptoticpart*finalsum
 end
 
 # from https://github.com/luchr/ComplexPortraits.jl.git
@@ -154,7 +149,11 @@ end
 
 struct Custom end
 function qnmfunction(::typeof(Custom); is_conjugate=false,is_minus=false, s=-2,l=2,m=2,n=0,a=0.00, ω = Complex(0.0), Alm = Complex(0.0), Cllʼ = [Complex(0.0)], N=150)
-    ((ζ,ξ,η),(p,α,γ,δ,σ),(D₀,D₁,D₂,D₃,D₄)) = ParameterTransformations(l,m,s,a,ω,Alm)
+    if is_conjugate==true
+        ((ζ,ξ,η),(p,α,γ,δ,σ),(D₀,D₁,D₂,D₃,D₄)) = ParameterTransformations(l,-m,s,a,-conj(ω),Alm)
+    else
+        ((ζ,ξ,η),(p,α,γ,δ,σ),(D₀,D₁,D₂,D₃,D₄)) = ParameterTransformations(l,m,s,a,ω,Alm)
+    end
     r₊ = 1 + sqrt(1-a^2); r₋ = 1 - sqrt(1-a^2)
 
     ##Radial WaveFunction

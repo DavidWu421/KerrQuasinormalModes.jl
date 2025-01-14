@@ -21,24 +21,12 @@ function ∂r(ψᵣ::HeunConfluentRadial)
     aₙshift = aₙshift .*nn
     aₙshift_static = similar_type(aₙ)(aₙshift)
     Ψaₙ = HeunConfluentRadial(η-1,α+1,ξ,ζ,r₊,r₋,aₙshift_static,is_conjugate,is_minus)
-    if is_conjugate==true
-        ξ=conj(ξ)
-        η=conj(η)
-        α=conj(α)
-        ζ=conj(ζ)
-    end
-    if is_minus==false && is_conjugate==false
+    if (is_minus==false && is_conjugate==false) || (is_minus==true && is_conjugate==true)
         println("first one")
         (im*(η-α))*Ψη + (im*ξ)*Ψξ + ζ*ψᵣ - Ψaₙ
-    elseif is_minus==true && is_conjugate==false
+    elseif (is_minus==true && is_conjugate==false) || (is_minus==false && is_conjugate==true)
         println("second one")
         (-im*(η-α))*Ψη + (-im*ξ)*Ψξ + ζ*ψᵣ - Ψaₙ
-    elseif is_minus==false && is_conjugate==true
-        println("third one")
-        (-(η-α))*Ψη - ξ*Ψξ - im*ζ*ψᵣ + im*Ψaₙ
-    elseif is_minus==true || is_conjugate==true
-        println("fourth one")
-        (η-α)*Ψη + ξ*Ψξ - im*ζ*ψᵣ + im*Ψaₙ
     end
 end
 
@@ -69,20 +57,10 @@ function ∂r(Ψ::QuasinormalModeFunction)
     aₙshift_static = similar_type(aₙ)(aₙshift)
     Ψaₙ = HeunConfluentRadial(η-1,α+1,ξ,ζ,r₊,r₋,aₙshift_static,is_conjugate,is_minus)
     Ψaₙf = QuasinormalModeFunction(s,l,m,n,a,ω,Alm,Ψaₙ,Ψ.S,is_conjugate,is_minus)
-    if is_conjugate==true
-        ξ=conj(ξ)
-        η=conj(η)
-        α=conj(α)
-        ζ=conj(ζ)
-    end
-    if is_minus==false && is_conjugate==false
+    if (is_minus==false && is_conjugate==false) || (is_minus==true && is_conjugate==true)
         (im*(η-α))*Ψηf + (im*ξ)*Ψξf + ζ*Ψ - Ψaₙf
-    elseif is_minus==true && is_conjugate==false
+    elseif (is_minus==true && is_conjugate==false) || (is_minus==false && is_conjugate==true)
         (-im*(η-α))*Ψηf + (-im*ξ)*Ψξf + ζ*Ψ - Ψaₙf
-    elseif is_minus==false && is_conjugate==true
-        (-(η-α))*Ψηf - ξ*Ψξf - im*ζ*Ψ + im*Ψaₙf
-    elseif is_minus==true && is_conjugate==true
-        (η-α)*Ψηf + ξ*Ψξf - im*ζ*Ψ + im*Ψaₙf
     end
 end
 
