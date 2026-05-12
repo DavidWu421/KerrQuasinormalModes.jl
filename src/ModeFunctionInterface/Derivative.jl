@@ -22,7 +22,6 @@ function ∂r(ψᵣ::HeunConfluentRadial)
     aₙshift_static = similar_type(aₙ)(aₙshift)
     Ψaₙ = HeunConfluentRadial(η-1,α+1,ξ,ζ,r₊,r₋,aₙshift_static,is_conjugate,is_minus)
     if (is_minus==false && is_conjugate==false) || (is_minus==true && is_conjugate==true)
-        println("first one")
         (im*(η-α))*Ψη + (im*ξ)*Ψξ + ζ*ψᵣ - Ψaₙ
     elseif (is_minus==true && is_conjugate==false) || (is_minus==false && is_conjugate==true)
         println("second one")
