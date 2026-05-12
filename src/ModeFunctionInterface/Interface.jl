@@ -183,22 +183,22 @@ end
 (Ψ::QuasinormalModeFunction)(x::NamedTuple{(:r, :θ, :ϕ, :t),Tuple{Number,Number,Number,Number}}) = Ψ.R(x[:r])*Ψ.S(cos(x[:θ]))*exp(im*Ψ.m*ϕ)
 (Ψ::QuasinormalModeFunction)(x::NamedTuple{(:r, :z, :ϕ, :t),Tuple{Number,Number,Number,Number}}) = Ψ.R(x[:r])*Ψ.S(x[:z])*exp(im*Ψ.m*ϕ)
 
-# Construct a Spin sequence that spits out QNM modes
-struct ModeSequence
-    spin_seq::SpinSequence
-end
+# # Construct a Spin sequence that spits out QNM modes
+# struct ModeSequence
+#     spin_seq::SpinSequence
+# end
 
-function (x::ModeSequence)(a::Real; N=150)
-    ω, Alm, Cllʼ = x.spin_seq(a)
-    @unpack  s,l,m,n = x.spin_seq.mode
-    qnmfunction(Custom; s=s,l=l,m=m,n=n,a=a,ω = ω, Alm = Alm, Cllʼ = Cllʼ, N=N)
-end
+# function (x::ModeSequence)(a::Real; N=150)
+#     ω, Alm, Cllʼ = x.spin_seq(a)
+#     @unpack  s,l,m,n = x.spin_seq.mode
+#     qnmfunction(Custom; s=s,l=l,m=m,n=n,a=a,ω = ω, Alm = Alm, Cllʼ = Cllʼ, N=N)
+# end
 
-function ModeSequence(;s=-2, l=2, m=2, n=0)
-    mode = Mode(s,l,m,n)
-    ss = SpinSequence(mode)
-    ModeSequence(ss)
-end
+# function ModeSequence(;s=-2, l=2, m=2, n=0)
+#     mode = Mode(s,l,m,n)
+#     ss = SpinSequence(mode)
+#     ModeSequence(ss)
+# end
 
 
 

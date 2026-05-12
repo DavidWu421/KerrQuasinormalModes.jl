@@ -12,17 +12,18 @@ using BSplineKit
 
 
 
-include(joinpath(@__DIR__, "ModeSolver" ,"Angular.jl"))
-include(joinpath(@__DIR__, "ModeSolver" ,"Radial.jl"))
-include(joinpath(@__DIR__, "ModeSolver" ,"RootSolver.jl"))
-include(joinpath(@__DIR__, "ModeSolver/Schwarszchild" ,"Schwarszchild.jl"))
-include(joinpath(@__DIR__, "ModeSolver" ,"SpinSequenceOptions.jl"))
-include(joinpath(@__DIR__, "ModeSolver" ,"SpinSequence.jl"))
+# include(joinpath(@__DIR__, "ModeSolver" ,"Angular.jl"))
+# include(joinpath(@__DIR__, "ModeSolver" ,"Radial.jl"))
+# include(joinpath(@__DIR__, "ModeSolver" ,"RootSolver.jl"))
+# include(joinpath(@__DIR__, "ModeSolver/Schwarszchild" ,"Schwarszchild.jl"))
+# include(joinpath(@__DIR__, "ModeSolver" ,"SpinSequenceOptions.jl"))
+# include(joinpath(@__DIR__, "ModeSolver" ,"SpinSequence.jl"))
 
 
 include(joinpath(@__DIR__, "ModeFunctionInterface" ,"SpinWeightedSphericalLookup.jl"))
 include(joinpath(@__DIR__, "ModeFunctionInterface" ,"Interface.jl"))
 include(joinpath(@__DIR__, "ModeFunctionInterface" ,"ConfluentHeun.jl"))
+include(joinpath(@__DIR__, "ModeFunctionInterface" ,"RadialHelpers.jl"))
 include(joinpath(@__DIR__, "ModeFunctionInterface" ,"LinearCombinations.jl"))
 include(joinpath(@__DIR__, "ModeFunctionInterface" ,"Derivative.jl"))
 
