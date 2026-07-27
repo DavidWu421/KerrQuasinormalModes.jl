@@ -26,7 +26,6 @@ include(joinpath(@__DIR__, "ModeFunctionInterface" ,"ConfluentHeun.jl"))
 include(joinpath(@__DIR__, "ModeFunctionInterface" ,"RadialHelpers.jl"))
 include(joinpath(@__DIR__, "ModeFunctionInterface" ,"LinearCombinations.jl"))
 include(joinpath(@__DIR__, "ModeFunctionInterface" ,"Derivative.jl"))
-include(joinpath(@__DIR__, "ModeFunctionInterface" ,"ScriptDerivatives.jl"))
 
 
 export SpinWeightedSpherical
